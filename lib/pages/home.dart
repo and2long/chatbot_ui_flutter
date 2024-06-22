@@ -16,6 +16,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   final String _tag = 'Home';
   final TextEditingController _inputController = TextEditingController();
+  final ScrollController _chatListController = ScrollController();
   final List<Message> _messages = [];
   final client = OllamaClient();
   Model? _selectedModel;
@@ -31,6 +32,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   void dispose() {
     _inputController.dispose();
+    _chatListController.dispose();
     super.dispose();
   }
 
@@ -62,7 +64,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               Container(
                 decoration: BoxDecoration(
                   border: Border(top: Divider.createBorderSide(context)),
-                  color: backgroundColor,
                 ),
                 padding: EdgeInsets.only(
                   top: 8,
@@ -135,11 +136,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Widget _buildChatList() {
     return ListView.builder(
+      controller: _chatListController,
       itemBuilder: (context, index) {
         Message msg = _messages[index];
-        return ListTile(
-          title: Text(msg.content),
-          tileColor: msg.role == MessageRole.user ? themeColor : Colors.grey,
+        return Container(
+          margin: const EdgeInsets.all(16),
+          child: Text(
+            '${msg.role == MessageRole.user ? '' : 'GPT:\n'}${msg.content}',
+            textAlign:
+                msg.role == MessageRole.user ? TextAlign.right : TextAlign.left,
+          ),
         );
       },
       itemCount: _messages.length,
@@ -155,13 +161,22 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     return models;
   }
 
+  void _addMessageToChatList(Message msg) {
+    setState(() {
+      _messages.add(msg);
+    });
+    Future.delayed(const Duration(milliseconds: 100), () {
+      _chatListController.jumpTo(
+        _chatListController.position.maxScrollExtent,
+      );
+    });
+  }
+
   void _send2LLM(String q) async {
     Log.i(_tag, '[Me]: $q');
     Log.d(_tag, '--> $q');
     String model = _selectedModel!.model!;
-    setState(() {
-      _messages.add(Message(role: MessageRole.user, content: q));
-    });
+    _addMessageToChatList(Message(role: MessageRole.user, content: q));
     final stream = client.generateChatCompletionStream(
       request: GenerateChatCompletionRequest(
         model: model,
@@ -176,8 +191,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       a += value;
     }
     Log.i(_tag, '[$model]: $a');
-    setState(() {
-      _messages.add(Message(role: MessageRole.system, content: a));
-    });
+    _addMessageToChatList(Message(role: MessageRole.system, content: a));
   }
 }
