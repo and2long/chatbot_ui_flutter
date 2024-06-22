@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_project_template/core/network/http.dart';
-import 'package:flutter_project_template/i18n/i18n.dart';
-import 'package:flutter_project_template/pages/home.dart';
-import 'package:flutter_project_template/store.dart';
-import 'package:flutter_project_template/theme.dart';
-import 'package:flutter_project_template/utils/common_util.dart';
-import 'package:flutter_project_template/utils/sp_util.dart';
+import 'package:chatbotui/core/network/http.dart';
+import 'package:chatbotui/i18n/i18n.dart';
+import 'package:chatbotui/pages/home.dart';
+import 'package:chatbotui/store.dart';
+import 'package:chatbotui/theme.dart';
+import 'package:chatbotui/utils/common_util.dart';
+import 'package:chatbotui/utils/sp_util.dart';
 import 'package:provider/provider.dart';
 
 void main() {

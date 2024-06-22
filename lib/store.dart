@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project_template/utils/sp_util.dart';
+import 'package:chatbotui/utils/sp_util.dart';
 import 'package:provider/provider.dart';
 
 /// 全局状态管理

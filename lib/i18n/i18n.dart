@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project_template/i18n/i18n_ja.dart';
-import 'package:flutter_project_template/i18n/i18n_zh.dart';
+import 'package:chatbotui/i18n/i18n_ja.dart';
+import 'package:chatbotui/i18n/i18n_zh.dart';
 
 /// 项目本地化资源代理
 class ProjectLocalizationsDelegate extends LocalizationsDelegate<S> {

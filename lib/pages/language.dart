@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project_template/i18n/i18n.dart';
-import 'package:flutter_project_template/store.dart';
+import 'package:chatbotui/i18n/i18n.dart';
+import 'package:chatbotui/store.dart';
 import 'package:provider/provider.dart';
 
 class LanguagePage extends StatefulWidget {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project_template/constants.dart';
+import 'package:chatbotui/constants.dart';
 
 class YTTile extends StatelessWidget {
   final Widget? leading;

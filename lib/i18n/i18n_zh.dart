@@ -1,4 +1,4 @@
-import 'package:flutter_project_template/i18n/i18n.dart';
+import 'package:chatbotui/i18n/i18n.dart';
 
 class ProjectLocalizationsZH implements S {
   @override

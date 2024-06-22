@@ -1,4 +1,4 @@
-package com.example.flutter_project_template
+package tech.and2long.chatbotui
 
 import io.flutter.embedding.android.FlutterActivity
 

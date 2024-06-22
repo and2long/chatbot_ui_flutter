@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_project_template/constants.dart';
-import 'package:flutter_project_template/utils/log_util.dart';
+import 'package:chatbotui/constants.dart';
+import 'package:chatbotui/utils/log_util.dart';
 
 class MyLogInterceptor extends Interceptor {
   final String _tag = 'XHTTP';
