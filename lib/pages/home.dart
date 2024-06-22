@@ -1,5 +1,6 @@
 import 'package:chatbotui/components/yt_text_field.dart';
 import 'package:chatbotui/store.dart';
+import 'package:chatbotui/theme.dart';
 import 'package:chatbotui/utils/log_util.dart';
 import 'package:flutter/material.dart';
 import 'package:ollama_dart/ollama_dart.dart';
@@ -16,9 +17,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   final String _tag = 'Home';
   final TextEditingController _inputController = TextEditingController();
   final List<Message> _messages = [];
-
   final client = OllamaClient();
   Model? _selectedModel;
+  bool _showSendBtn = false;
+  bool _showClearBtn = false;
 
   @override
   void initState() {
@@ -50,21 +52,51 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           body: Column(
             children: [
               Expanded(
-                  child: _selectedModel == null
-                      ? const Center(
-                          child: Text(
-                              'No modles were found on your Local machine!'),
-                        )
-                      : Container()),
-              SafeArea(
+                child: _selectedModel == null
+                    ? const Center(
+                        child:
+                            Text('No modles were found on your Local machine!'),
+                      )
+                    : _buildChatList(),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border(top: Divider.createBorderSide(context)),
+                  color: backgroundColor,
+                ),
+                padding: EdgeInsets.only(
+                  top: 8,
+                  left: 16,
+                  right: 16,
+                  bottom: 16 + MediaQuery.of(context).padding.bottom,
+                ),
                 child: YTTextField(
-                  margin: const EdgeInsets.all(16),
                   controller: _inputController,
+                  hintText: 'Enter your question',
+                  onChanged: (value) {
+                    setState(() {
+                      _showSendBtn = value.isNotEmpty;
+                      _showClearBtn = value.isNotEmpty;
+                    });
+                  },
                   suffixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      IconButton(
-                          onPressed: _onSendBtnPressed, icon: Icon(Icons.send))
+                      _showClearBtn
+                          ? IconButton(
+                              onPressed: _clearInput,
+                              icon: const Icon(Icons.clear),
+                            )
+                          : Container(),
+                      _showSendBtn
+                          ? IconButton(
+                              onPressed: _onSendBtnPressed,
+                              icon: const Icon(
+                                Icons.send,
+                                color: themeColor,
+                              ),
+                            )
+                          : Container(),
                     ],
                   ),
                 ),
@@ -76,10 +108,19 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     );
   }
 
+  void _clearInput() {
+    _inputController.clear();
+    setState(() {
+      _showClearBtn = false;
+      _showSendBtn = false;
+    });
+  }
+
   void _onSendBtnPressed() {
     String text = _inputController.text.trim();
     if (text.isNotEmpty) {
       _send2LLM(text);
+      _clearInput();
     }
   }
 
@@ -90,6 +131,19 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         _selectedModel = models.first;
       });
     }
+  }
+
+  Widget _buildChatList() {
+    return ListView.builder(
+      itemBuilder: (context, index) {
+        Message msg = _messages[index];
+        return ListTile(
+          title: Text(msg.content),
+          tileColor: msg.role == MessageRole.user ? themeColor : Colors.grey,
+        );
+      },
+      itemCount: _messages.length,
+    );
   }
 
   Future<List<Model>?> _listModels() async {
@@ -105,7 +159,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     Log.i(_tag, '[Me]: $q');
     Log.d(_tag, '--> $q');
     String model = _selectedModel!.model!;
-    _messages.add(Message(role: MessageRole.user, content: q));
+    setState(() {
+      _messages.add(Message(role: MessageRole.user, content: q));
+    });
     final stream = client.generateChatCompletionStream(
       request: GenerateChatCompletionRequest(
         model: model,
@@ -120,6 +176,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       a += value;
     }
     Log.i(_tag, '[$model]: $a');
-    _messages.add(Message(role: MessageRole.system, content: a));
+    setState(() {
+      _messages.add(Message(role: MessageRole.system, content: a));
+    });
   }
 }

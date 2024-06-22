@@ -1,6 +1,6 @@
+import 'package:chatbotui/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:chatbotui/theme.dart';
 
 class YTTextField extends StatefulWidget {
   final TextEditingController controller;
@@ -10,6 +10,7 @@ class YTTextField extends StatefulWidget {
   final EdgeInsetsGeometry? margin;
   final TextInputAction? textInputAction;
   final TextInputType? keyboardType;
+  final ValueChanged<String>? onChanged;
   final List<TextInputFormatter>? inputFormatters;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
@@ -23,6 +24,7 @@ class YTTextField extends StatefulWidget {
     this.hintText,
     this.textInputAction,
     this.margin,
+    this.onChanged,
     this.keyboardType,
     this.inputFormatters,
     this.prefixIcon,
@@ -62,13 +64,14 @@ class _YTTextFieldState extends State<YTTextField> {
             widget.onSubmitted ?? (_) => FocusScope.of(context).nextFocus(),
         controller: widget.controller,
         style: Theme.of(context).textTheme.bodyMedium,
-        onChanged: (value) {
-          if (widget.suffixIcon == null) {
-            setState(() {
-              _showSufix = widget.controller.text.isNotEmpty;
-            });
-          }
-        },
+        onChanged: widget.onChanged ??
+            (value) {
+              if (widget.suffixIcon == null) {
+                setState(() {
+                  _showSufix = widget.controller.text.isNotEmpty;
+                });
+              }
+            },
         decoration: InputDecoration(
           prefixIcon: widget.prefixIcon,
           suffixIcon: widget.suffixIcon ??
