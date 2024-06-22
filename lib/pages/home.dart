@@ -1,7 +1,9 @@
+import 'package:chatbotui/components/yt_text_field.dart';
+import 'package:chatbotui/store.dart';
+import 'package:chatbotui/utils/log_util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:chatbotui/pages/me.dart';
-import 'package:chatbotui/pages/page1.dart';
+import 'package:ollama_dart/ollama_dart.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -11,55 +13,113 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
-  int _tabIndex = 0;
-  final _pageController = PageController();
+  final String _tag = 'Home';
+  final TextEditingController _inputController = TextEditingController();
+  final List<Message> _messages = [];
+
+  final client = OllamaClient();
+  Model? _selectedModel;
 
   @override
   void initState() {
     super.initState();
-    EasyLoading.instance
-      ..maskType = EasyLoadingMaskType.black
-      ..indicatorSize = 30.0;
+    _init();
   }
 
   @override
   void dispose() {
+    _inputController.dispose();
     super.dispose();
-    _pageController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: PageView(
-        physics: const NeverScrollableScrollPhysics(),
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() {
-            _tabIndex = index;
-          });
-        },
-        children: const [
-          Page1(),
-          Me(),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Tab1',
+    return Consumer<InfoStore>(
+      builder: (BuildContext context, InfoStore store, Widget? child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Chatbot UI'),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    // TODO 2024-06-22 switch model
+                  },
+                  child: Text(_selectedModel?.model ?? ''))
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Tab2',
+          body: Column(
+            children: [
+              Expanded(
+                  child: _selectedModel == null
+                      ? const Center(
+                          child: Text(
+                              'No modles were found on your Local machine!'),
+                        )
+                      : Container()),
+              SafeArea(
+                child: YTTextField(
+                  margin: const EdgeInsets.all(16),
+                  controller: _inputController,
+                  suffixIcon: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                          onPressed: _onSendBtnPressed, icon: Icon(Icons.send))
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-        currentIndex: _tabIndex,
-        onTap: (index) {
-          _pageController.jumpToPage(index);
-        },
+        );
+      },
+    );
+  }
+
+  void _onSendBtnPressed() {
+    String text = _inputController.text.trim();
+    if (text.isNotEmpty) {
+      _send2LLM(text);
+    }
+  }
+
+  void _init() async {
+    List<Model>? models = await _listModels();
+    if (models != null && models.isNotEmpty) {
+      setState(() {
+        _selectedModel = models.first;
+      });
+    }
+  }
+
+  Future<List<Model>?> _listModels() async {
+    ModelsResponse res = await client.listModels();
+    List<Model>? models = res.models;
+    if (models != null && mounted) {
+      context.read<InfoStore>().updateModels(models);
+    }
+    return models;
+  }
+
+  void _send2LLM(String q) async {
+    Log.i(_tag, '[Me]: $q');
+    Log.d(_tag, '--> $q');
+    String model = _selectedModel!.model!;
+    _messages.add(Message(role: MessageRole.user, content: q));
+    final stream = client.generateChatCompletionStream(
+      request: GenerateChatCompletionRequest(
+        model: model,
+        messages: _messages,
+        keepAlive: 1,
       ),
     );
+    String a = '';
+    await for (final res in stream) {
+      String value = (res.message?.content ?? '');
+      Log.d(_tag, '<-- $value');
+      a += value;
+    }
+    Log.i(_tag, '[$model]: $a');
+    _messages.add(Message(role: MessageRole.system, content: a));
   }
 }
