@@ -2,7 +2,9 @@ import 'package:chatbotui/components/yt_text_field.dart';
 import 'package:chatbotui/store.dart';
 import 'package:chatbotui/theme.dart';
 import 'package:chatbotui/utils/log_util.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:ollama_dart/ollama_dart.dart';
 import 'package:provider/provider.dart';
 
@@ -43,6 +45,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         return Scaffold(
           appBar: AppBar(
             title: const Text('Chatbot UI'),
+            centerTitle: false,
             actions: [
               PopupMenuButton<Model>(
                 itemBuilder: (context) {
@@ -60,15 +63,22 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   });
                 },
                 initialValue: _selectedModel,
-                child: Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    child: Row(
-                      children: [
-                        Text(_selectedModel?.model ?? ''),
-                        const Icon(Icons.arrow_drop_down)
-                      ],
-                    )),
-              )
+                child: Row(
+                  children: [
+                    Text(_selectedModel?.model ?? ''),
+                    const Icon(Icons.arrow_drop_down)
+                  ],
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    _messages.clear();
+                  });
+                },
+                icon: const Icon(CupertinoIcons.create),
+              ),
+              const SizedBox(width: 8),
             ],
           ),
           body: Column(
@@ -159,13 +169,29 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       controller: _chatListController,
       itemBuilder: (context, index) {
         Message msg = _messages[index];
-        return Container(
-          margin: const EdgeInsets.all(16),
-          child: Text(
-            '${msg.role == MessageRole.user ? '' : 'GPT:\n'}${msg.content}',
-            textAlign:
-                msg.role == MessageRole.user ? TextAlign.right : TextAlign.left,
-          ),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              margin: const EdgeInsets.only(left: 16, top: 16),
+              child: Row(children: [
+                msg.role == MessageRole.user
+                    ? const Icon(CupertinoIcons.profile_circled)
+                    : const Icon(CupertinoIcons.rocket),
+                const SizedBox(width: 8),
+                Text(msg.role == MessageRole.user ? 'Me' : 'Chatbot')
+              ]),
+            ),
+            Container(
+              margin: const EdgeInsets.only(
+                  top: 8, left: 50, right: 16, bottom: 16),
+              child: MarkdownBody(
+                styleSheetTheme: MarkdownStyleSheetBaseTheme.cupertino,
+                selectable: true,
+                data: msg.content,
+              ),
+            ),
+          ],
         );
       },
       itemCount: _messages.length,
