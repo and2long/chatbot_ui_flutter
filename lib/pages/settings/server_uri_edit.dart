@@ -1,5 +1,6 @@
 import 'package:chatbotui/components/primary_button.dart';
 import 'package:chatbotui/components/yt_text_field.dart';
+import 'package:chatbotui/constants.dart';
 import 'package:chatbotui/core/event_bus.dart';
 import 'package:chatbotui/enums.dart';
 import 'package:chatbotui/store.dart';
@@ -37,6 +38,13 @@ class _ServerURIEditPageState extends State<ServerURIEditPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ollama Server URI'),
+        actions: [
+          TextButton(
+              onPressed: () {
+                _controller.text = ollamaServerBaseUrl;
+              },
+              child: const Text('Reset'))
+        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
