@@ -1,7 +1,7 @@
 import 'package:chatbotui/components/yt_text_field.dart';
 import 'package:chatbotui/components/yt_tile.dart';
 import 'package:chatbotui/i18n/i18n.dart';
-import 'package:chatbotui/pages/settings.dart';
+import 'package:chatbotui/pages/settings/settings.dart';
 import 'package:chatbotui/store.dart';
 import 'package:chatbotui/theme.dart';
 import 'package:chatbotui/utils/log_util.dart';

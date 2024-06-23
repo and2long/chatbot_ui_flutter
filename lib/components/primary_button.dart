@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:chatbotui/theme.dart';
+import 'package:flutter/material.dart';
 
 /// 通用的按钮
 class PrimaryButton extends StatelessWidget {
@@ -26,7 +26,7 @@ class PrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: margin,
-      height: height ?? 60,
+      height: height ?? 50,
       width: width,
       child: ElevatedButton(
         style: ButtonStyle(

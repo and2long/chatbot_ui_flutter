@@ -55,6 +55,15 @@ class SPUtil {
     return _spf.getString(ConstantsKeyCache.keyRefreshToken);
   }
 
+  static Future<bool> saveOllamaServerBaseUrl(String value) {
+    return _spf.setString(ConstantsKeyCache.keyOllamaServerBaseUrl, value);
+  }
+
+  static String getOllamaServerBaseUrl() {
+    return _spf.getString(ConstantsKeyCache.keyOllamaServerBaseUrl) ??
+        ollamaServerBaseUrl;
+  }
+
   static void clean() async {
     // 清空所有本地数据，只保存是否是首次进入app的状态和语言设置
     bool value = isFirst();

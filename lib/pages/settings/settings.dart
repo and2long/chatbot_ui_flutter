@@ -1,5 +1,7 @@
 import 'package:chatbotui/components/yt_tile.dart';
+import 'package:chatbotui/pages/settings/server_uri_edit.dart';
 import 'package:chatbotui/store.dart';
+import 'package:chatbotui/utils/navigator_util.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -31,6 +33,9 @@ class _SettingsPageState extends State<SettingsPage> {
               YTTile(
                 title: 'Server URI',
                 subtitle: value.baseUrl,
+                onTap: () {
+                  NavigatorUtil.push(context, const ServerURIEditPage());
+                },
               ),
               YTTile(
                 title: 'Default Model',

@@ -9,6 +9,7 @@ class ConstantsKeyCache {
   static String keyFCMToken = "FCM_TOKEN";
   static String keyIsFirst = "IS_FIRST";
   static String keyUser = "USER";
+  static String keyOllamaServerBaseUrl = "OLLAMA_SERVER_BASE_URL";
 }
 
 class ConstantsHttp {
@@ -19,3 +20,4 @@ class ConstantsHttp {
 
 const appBarHeight = kToolbarHeight;
 const tileHeight = 55.0;
+const ollamaServerBaseUrl = 'http://localhost:11434/api';

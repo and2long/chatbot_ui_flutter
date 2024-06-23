@@ -14,7 +14,11 @@ class Store {
         // 国际化
         ChangeNotifierProvider.value(
             value: LocaleStore(SPUtil.getLanguageCode())),
-        ChangeNotifierProvider.value(value: InfoStore()),
+        ChangeNotifierProvider.value(
+          value: InfoStore(
+            ollamaServerBaseUrl: SPUtil.getOllamaServerBaseUrl(),
+          ),
+        ),
       ],
       child: child,
     );
@@ -38,18 +42,22 @@ class LocaleStore with ChangeNotifier {
 
 class InfoStore with ChangeNotifier {
   List<Model> _modles = [];
-  String _baseUrl = 'http://localhost:11434/api';
+  String _ollamaServerBaseUrl;
+
+  InfoStore({required String ollamaServerBaseUrl})
+      : _ollamaServerBaseUrl = ollamaServerBaseUrl;
 
   List<Model> get models => _modles;
-  String get baseUrl => _baseUrl;
+  String get baseUrl => _ollamaServerBaseUrl;
 
   void updateModels(List<Model> value) {
     _modles = value;
     notifyListeners();
   }
 
-  void updateBaseUrl(String value) {
-    _baseUrl = value;
+  void updateOllamaServerBaseUrl(String value) {
+    _ollamaServerBaseUrl = value;
+    SPUtil.saveOllamaServerBaseUrl(value);
     notifyListeners();
   }
 }
