@@ -194,7 +194,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               hintText: 'Prompt',
               onChanged: (value) {
                 setState(() {
-                  _sendBtnEnable = value.isNotEmpty;
+                  _sendBtnEnable = value.isNotEmpty && _selectedModel != null;
                   _showClearBtn = value.isNotEmpty;
                 });
               },
