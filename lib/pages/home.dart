@@ -331,12 +331,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       ),
     );
     String a = '';
+    _addMessageToChatList(Message(role: MessageRole.system, content: a));
     await for (final res in stream) {
       String value = (res.message?.content ?? '');
       Log.d(_tag, '<-- $value');
       a += value;
+      _messages.removeLast();
+      _addMessageToChatList(Message(role: MessageRole.system, content: a));
     }
     Log.i(_tag, '[$model]: $a');
-    _addMessageToChatList(Message(role: MessageRole.system, content: a));
   }
 }
