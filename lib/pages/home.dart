@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:chatbotui/components/yt_text_field.dart';
 import 'package:chatbotui/components/yt_tile.dart';
+import 'package:chatbotui/core/event_bus.dart';
+import 'package:chatbotui/enums.dart';
 import 'package:chatbotui/i18n/i18n.dart';
 import 'package:chatbotui/pages/settings/settings.dart';
 import 'package:chatbotui/store.dart';
@@ -28,17 +32,25 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Model? _selectedModel;
   bool _showClearBtn = false;
   bool _sendBtnEnable = false;
+  StreamSubscription? _commonEventSubscription;
+  OllamaClientException? _exception;
 
   @override
   void initState() {
     super.initState();
     _init();
+    _commonEventSubscription = EventBus().on<CommonEvent>().listen((event) {
+      if (event == CommonEvent.ollamaServerUrlChanged) {
+        _init();
+      }
+    });
   }
 
   @override
   void dispose() {
     _inputController.dispose();
     _chatListController.dispose();
+    _commonEventSubscription?.cancel();
     super.dispose();
   }
 
@@ -55,13 +67,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           body: Column(
             children: [
               Expanded(
-                child: _selectedModel == null
-                    ? const Center(
-                        child:
-                            Text('No modles were found on your Local machine!'),
-                      )
-                    : _buildChatList(),
-              ),
+                  child: _selectedModel == null
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(_exception == null
+                                ? 'No modles were found on your Local machine!'
+                                : _exception?.body?.toString() ?? ''),
+                          ),
+                        )
+                      : _buildChatList()),
               _buildInputPanel(),
             ],
           ),
@@ -234,10 +249,17 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   void _init() async {
     _ollamaClient = OllamaClient(baseUrl: context.read<InfoStore>().baseUrl);
-    List<Model>? models = await _listModels();
-    if (models != null && models.isNotEmpty) {
+    try {
+      List<Model>? models = await _listModels();
+      if (models != null && models.isNotEmpty) {
+        setState(() {
+          _selectedModel = models.first;
+        });
+      }
+    } on OllamaClientException catch (e) {
+      Log.e(_tag, e);
       setState(() {
-        _selectedModel = models.first;
+        _exception = e;
       });
     }
   }

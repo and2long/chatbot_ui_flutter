@@ -1,5 +1,7 @@
 import 'package:chatbotui/components/primary_button.dart';
 import 'package:chatbotui/components/yt_text_field.dart';
+import 'package:chatbotui/core/event_bus.dart';
+import 'package:chatbotui/enums.dart';
 import 'package:chatbotui/store.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -56,6 +58,7 @@ class _ServerURIEditPageState extends State<ServerURIEditPage> {
               String value = _controller.text.trim();
               if (value.isNotEmpty) {
                 context.read<InfoStore>().updateOllamaServerBaseUrl(value);
+                EventBus().fire(CommonEvent.ollamaServerUrlChanged);
                 Navigator.pop(context);
               }
             },
