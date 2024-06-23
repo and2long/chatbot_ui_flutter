@@ -22,8 +22,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   final List<Message> _messages = [];
   final client = OllamaClient();
   Model? _selectedModel;
-  bool _showSendBtn = false;
   bool _showClearBtn = false;
+  bool _sendBtnEnable = false;
 
   @override
   void initState() {
@@ -46,40 +46,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           appBar: AppBar(
             title: const Text('Chatbot UI'),
             centerTitle: false,
-            actions: [
-              PopupMenuButton<Model>(
-                itemBuilder: (context) {
-                  return List.generate(store.models.length, (index) {
-                    Model model = store.models[index];
-                    return PopupMenuItem<Model>(
-                      value: model,
-                      child: Text(model.model ?? ''),
-                    );
-                  });
-                },
-                onSelected: (value) {
-                  setState(() {
-                    _selectedModel = value;
-                  });
-                },
-                initialValue: _selectedModel,
-                child: Row(
-                  children: [
-                    Text(_selectedModel?.model ?? ''),
-                    const Icon(Icons.arrow_drop_down)
-                  ],
-                ),
-              ),
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    _messages.clear();
-                  });
-                },
-                icon: const Icon(CupertinoIcons.create),
-              ),
-              const SizedBox(width: 8),
-            ],
+            actions: _buildAppBarActions(store.models),
           ),
           body: Column(
             children: [
@@ -91,47 +58,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       )
                     : _buildChatList(),
               ),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border(top: Divider.createBorderSide(context)),
-                ),
-                padding: EdgeInsets.only(
-                  top: 8,
-                  left: 16,
-                  right: 16,
-                  bottom: 16 + MediaQuery.of(context).padding.bottom,
-                ),
-                child: YTTextField(
-                  controller: _inputController,
-                  hintText: 'Enter your question',
-                  onChanged: (value) {
-                    setState(() {
-                      _showSendBtn = value.isNotEmpty;
-                      _showClearBtn = value.isNotEmpty;
-                    });
-                  },
-                  suffixIcon: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _showClearBtn
-                          ? IconButton(
-                              onPressed: _clearInput,
-                              icon: const Icon(Icons.clear),
-                            )
-                          : Container(),
-                      _showSendBtn
-                          ? IconButton(
-                              onPressed: _onSendBtnPressed,
-                              icon: const Icon(
-                                Icons.send,
-                                color: themeColor,
-                              ),
-                            )
-                          : Container(),
-                    ],
-                  ),
-                ),
-              ),
+              _buildInputPanel(),
             ],
           ),
         );
@@ -139,11 +66,104 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     );
   }
 
+  List<Widget> _buildAppBarActions(List models) {
+    return [
+      PopupMenuButton<Model>(
+        itemBuilder: (context) {
+          return List.generate(models.length, (index) {
+            Model model = models[index];
+            return PopupMenuItem<Model>(
+              value: model,
+              child: Text(model.model ?? ''),
+            );
+          });
+        },
+        onSelected: (value) {
+          setState(() {
+            _selectedModel = value;
+          });
+        },
+        initialValue: _selectedModel,
+        child: Row(
+          children: [
+            Text(_selectedModel?.model ?? ''),
+            const Icon(Icons.arrow_drop_down)
+          ],
+        ),
+      ),
+      IconButton(
+        onPressed: () {
+          setState(() {
+            _messages.clear();
+          });
+        },
+        icon: const Icon(CupertinoIcons.create),
+      ),
+      const SizedBox(width: 8),
+    ];
+  }
+
+  Widget _buildInputPanel() {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(top: Divider.createBorderSide(context)),
+      ),
+      padding: EdgeInsets.only(
+        top: 8,
+        left: 16,
+        right: 16,
+        bottom: 16 + MediaQuery.of(context).padding.bottom,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: YTTextField(
+              controller: _inputController,
+              hintText: 'Prompt',
+              onChanged: (value) {
+                setState(() {
+                  _sendBtnEnable = value.isNotEmpty;
+                  _showClearBtn = value.isNotEmpty;
+                });
+              },
+              suffixIcon: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _showClearBtn
+                      ? IconButton(
+                          onPressed: _clearInput,
+                          icon: const Icon(CupertinoIcons.clear_circled),
+                        )
+                      : Container(),
+                ],
+              ),
+            ),
+          ),
+          InkWell(
+            onTap: _onSendBtnPressed,
+            child: Container(
+              width: 48,
+              height: 48,
+              margin: const EdgeInsets.only(left: 8),
+              decoration: BoxDecoration(
+                  color: _sendBtnEnable ? themeColor : Colors.grey.shade400,
+                  borderRadius: const BorderRadius.all(Radius.circular(48))),
+              child: Icon(
+                CupertinoIcons.up_arrow,
+                color: _sendBtnEnable ? Colors.white : Colors.grey.shade300,
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
   void _clearInput() {
     _inputController.clear();
     setState(() {
       _showClearBtn = false;
-      _showSendBtn = false;
+      _sendBtnEnable = false;
     });
   }
 
