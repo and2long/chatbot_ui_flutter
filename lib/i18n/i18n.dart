@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:chatbotui/i18n/i18n_ja.dart';
 import 'package:chatbotui/i18n/i18n_zh.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 /// 项目本地化资源代理
 class ProjectLocalizationsDelegate extends LocalizationsDelegate<S> {
@@ -50,7 +50,7 @@ abstract class S {
   ];
 
   // 不需要翻译的字段，直接赋值。
-  static String appName = 'AppName';
+  static String appName = 'Chatbot UI';
   static String japanese = '日本語';
   static String simpleChinese = '简体中文';
   static Map<String, String> localeSets = {'ja': japanese, 'zh': simpleChinese};

@@ -1,7 +1,11 @@
 import 'package:chatbotui/components/yt_text_field.dart';
+import 'package:chatbotui/components/yt_tile.dart';
+import 'package:chatbotui/i18n/i18n.dart';
+import 'package:chatbotui/pages/settings.dart';
 import 'package:chatbotui/store.dart';
 import 'package:chatbotui/theme.dart';
 import 'package:chatbotui/utils/log_util.dart';
+import 'package:chatbotui/utils/navigator_util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -20,7 +24,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _chatListController = ScrollController();
   final List<Message> _messages = [];
-  final client = OllamaClient();
+  late OllamaClient _ollamaClient;
   Model? _selectedModel;
   bool _showClearBtn = false;
   bool _sendBtnEnable = false;
@@ -44,7 +48,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       builder: (BuildContext context, InfoStore store, Widget? child) {
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Chatbot UI'),
+            title: Text(S.appName),
             centerTitle: false,
             actions: _buildAppBarActions(store.models),
           ),
@@ -61,8 +65,61 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               _buildInputPanel(),
             ],
           ),
+          drawer: _buildDrawer(),
         );
       },
+    );
+  }
+
+  Widget _buildDrawer() {
+    return Drawer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          DrawerHeader(
+            decoration: const BoxDecoration(
+              color: themeColor,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  S.appName,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(color: Colors.white),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'This is a Chatbot UI for Ollama.',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(color: Colors.white),
+                )
+              ],
+            ),
+          ),
+          const Expanded(
+            // TODO 2024-06-23 chat history
+            child: Text('TODO: Chat History'),
+          ),
+          const Divider(),
+          Container(
+            margin:
+                EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+            child: YTTile(
+              leading: const Icon(Icons.settings),
+              title: 'Settings',
+              onTap: () {
+                Navigator.pop(context);
+                NavigatorUtil.push(context, const SettingsPage());
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -176,6 +233,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   void _init() async {
+    _ollamaClient = OllamaClient(baseUrl: context.read<InfoStore>().baseUrl);
     List<Model>? models = await _listModels();
     if (models != null && models.isNotEmpty) {
       setState(() {
@@ -219,7 +277,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Future<List<Model>?> _listModels() async {
-    ModelsResponse res = await client.listModels();
+    ModelsResponse res = await _ollamaClient.listModels();
     List<Model>? models = res.models;
     if (models != null && mounted) {
       context.read<InfoStore>().updateModels(models);
@@ -243,7 +301,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     Log.d(_tag, '--> $q');
     String model = _selectedModel!.model!;
     _addMessageToChatList(Message(role: MessageRole.user, content: q));
-    final stream = client.generateChatCompletionStream(
+    final stream = _ollamaClient.generateChatCompletionStream(
       request: GenerateChatCompletionRequest(
         model: model,
         messages: _messages,

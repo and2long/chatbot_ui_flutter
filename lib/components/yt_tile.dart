@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:chatbotui/constants.dart';
+import 'package:flutter/material.dart';
 
 class YTTile extends StatelessWidget {
   final Widget? leading;
@@ -24,7 +24,7 @@ class YTTile extends StatelessWidget {
       onTap: onTap,
       child: Container(
         height: tileHeight,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           border: Border(bottom: Divider.createBorderSide(context)),
         ),
@@ -34,7 +34,7 @@ class YTTile extends StatelessWidget {
             Row(
               children: [
                 Offstage(
-                  offstage: leading == null || (hideLeading ?? true),
+                  offstage: leading == null || (hideLeading ?? false),
                   child: Container(
                     width: 35,
                     alignment: Alignment.centerLeft,

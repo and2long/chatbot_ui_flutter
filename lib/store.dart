@@ -38,11 +38,18 @@ class LocaleStore with ChangeNotifier {
 
 class InfoStore with ChangeNotifier {
   List<Model> _modles = [];
+  String _baseUrl = 'http://localhost:11434/api';
 
   List<Model> get models => _modles;
+  String get baseUrl => _baseUrl;
 
   void updateModels(List<Model> value) {
     _modles = value;
+    notifyListeners();
+  }
+
+  void updateBaseUrl(String value) {
+    _baseUrl = value;
     notifyListeners();
   }
 }
