@@ -44,11 +44,31 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           appBar: AppBar(
             title: const Text('Chatbot UI'),
             actions: [
-              TextButton(
-                  onPressed: () {
-                    // TODO 2024-06-22 switch model
-                  },
-                  child: Text(_selectedModel?.model ?? ''))
+              PopupMenuButton<Model>(
+                itemBuilder: (context) {
+                  return List.generate(store.models.length, (index) {
+                    Model model = store.models[index];
+                    return PopupMenuItem<Model>(
+                      value: model,
+                      child: Text(model.model ?? ''),
+                    );
+                  });
+                },
+                onSelected: (value) {
+                  setState(() {
+                    _selectedModel = value;
+                  });
+                },
+                initialValue: _selectedModel,
+                child: Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    child: Row(
+                      children: [
+                        Text(_selectedModel?.model ?? ''),
+                        const Icon(Icons.arrow_drop_down)
+                      ],
+                    )),
+              )
             ],
           ),
           body: Column(
