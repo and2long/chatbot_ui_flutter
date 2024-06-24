@@ -198,6 +198,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   _showClearBtn = value.isNotEmpty;
                 });
               },
+              onSubmitted: (value) {
+                _onSendBtnPressed();
+              },
               suffixIcon: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -211,15 +214,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               ),
             ),
           ),
-          InkWell(
+          GestureDetector(
             onTap: _onSendBtnPressed,
             child: Container(
               width: 48,
               height: 48,
               margin: const EdgeInsets.only(left: 8),
               decoration: BoxDecoration(
-                  color: _sendBtnEnable ? themeColor : Colors.grey.shade400,
-                  borderRadius: const BorderRadius.all(Radius.circular(48))),
+                color: _sendBtnEnable ? themeColor : Colors.grey.shade400,
+                borderRadius: const BorderRadius.all(Radius.circular(48)),
+              ),
               child: Icon(
                 CupertinoIcons.up_arrow,
                 color: _sendBtnEnable ? Colors.white : Colors.grey.shade300,
