@@ -32,7 +32,6 @@
 /build/
 
 # Web related
-lib/generated_plugin_registrant.dart
 
 # Symbolication related
 app.*.symbols
@@ -62,3 +61,9 @@ Runner.ipa
 pubspec.lock
 Podfile.lock
 devtools_options.yaml
+
+.firebaserc
+firebase.json
+.firebase/
+.github/workflows/firebase-hosting-merge.yml
+.github/workflows/firebase-hosting-pull-request.yml
