@@ -18,17 +18,20 @@ class ConversationAdapter extends TypeAdapter<Conversation> {
     };
     return Conversation(
       name: fields[0] as String,
-      messages: (fields[1] as List).cast<ChatMessage>(),
+      timestamp: fields[1] as DateTime,
+      messages: (fields[2] as List).cast<ChatMessage>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, Conversation obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(3)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
+      ..write(obj.timestamp)
+      ..writeByte(2)
       ..write(obj.messages);
   }
 

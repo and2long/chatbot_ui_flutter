@@ -2,9 +2,13 @@ import 'dart:async';
 
 import 'package:chatbotui/components/yt_text_field.dart';
 import 'package:chatbotui/components/yt_tile.dart';
+import 'package:chatbotui/constants.dart';
 import 'package:chatbotui/core/event_bus.dart';
 import 'package:chatbotui/enums.dart';
 import 'package:chatbotui/i18n/i18n.dart';
+import 'package:chatbotui/models/chat_message.dart';
+import 'package:chatbotui/models/conversation.dart';
+import 'package:chatbotui/pages/chat_history.dart';
 import 'package:chatbotui/pages/settings/settings.dart';
 import 'package:chatbotui/store.dart';
 import 'package:chatbotui/theme.dart';
@@ -13,6 +17,7 @@ import 'package:chatbotui/utils/navigator_util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:ollama_dart/ollama_dart.dart';
 import 'package:provider/provider.dart';
 
@@ -34,14 +39,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   bool _sendBtnEnable = false;
   StreamSubscription? _commonEventSubscription;
   OllamaClientException? _exception;
+  final Box<Conversation> _box = Hive.box<Conversation>(conversationBox);
 
   @override
   void initState() {
     super.initState();
-    _init();
+    _initOllama();
     _commonEventSubscription = EventBus().on<CommonEvent>().listen((event) {
       if (event == CommonEvent.ollamaServerUrlChanged) {
-        _init();
+        _initOllama();
       }
     });
   }
@@ -51,7 +57,28 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     _inputController.dispose();
     _chatListController.dispose();
     _commonEventSubscription?.cancel();
+    _saveConversation();
     super.dispose();
+  }
+
+  void _saveConversation() {
+    if (_messages.isNotEmpty) {
+      _box.add(Conversation(
+        name: _messages.first.content,
+        timestamp: DateTime.now(),
+        messages: _messages
+            .map((e) => ChatMessage(
+                  content: e.content,
+                  isUser: e.role == MessageRole.user,
+                ))
+            .toList(),
+      ));
+      if (mounted) {
+        setState(() {
+          _messages.clear();
+        });
+      }
+    }
   }
 
   @override
@@ -117,8 +144,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             ),
           ),
           const Expanded(
-            // TODO 2024-06-23 chat history
-            child: Text('TODO: Chat History'),
+            child: ChatHistory(),
           ),
           const Divider(),
           Container(
@@ -164,11 +190,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         ),
       ),
       IconButton(
-        onPressed: () {
-          setState(() {
-            _messages.clear();
-          });
-        },
+        onPressed: _saveConversation,
         icon: const Icon(CupertinoIcons.create),
       ),
       const SizedBox(width: 8),
@@ -251,7 +273,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     }
   }
 
-  void _init() async {
+  void _initOllama() async {
     _ollamaClient = OllamaClient(baseUrl: context.read<InfoStore>().baseUrl);
     try {
       List<Model>? models = await _listModels();
