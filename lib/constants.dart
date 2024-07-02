@@ -21,3 +21,5 @@ class ConstantsHttp {
 const appBarHeight = kToolbarHeight;
 const tileHeight = 55.0;
 const ollamaServerBaseUrl = 'http://localhost:11434/api';
+
+const conversationBox = 'conversations';

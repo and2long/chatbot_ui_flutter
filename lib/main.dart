@@ -1,6 +1,9 @@
 import 'dart:io';
 
+import 'package:chatbotui/constants.dart';
 import 'package:chatbotui/i18n/i18n.dart';
+import 'package:chatbotui/models/chat_message.dart';
+import 'package:chatbotui/models/conversation.dart';
 import 'package:chatbotui/pages/home.dart';
 import 'package:chatbotui/store.dart';
 import 'package:chatbotui/theme.dart';
@@ -9,10 +12,17 @@ import 'package:chatbotui/utils/sp_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Hive.initFlutter();
+  Hive.registerAdapter(ConversationAdapter());
+  Hive.registerAdapter(ChatMessageAdapter());
+  await Hive.openBox<Conversation>(conversationBox);
+
   SPUtil.init().then((value) {
     runApp(Store.init(const MyApp()));
   });
